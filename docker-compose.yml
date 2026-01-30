@@ -1,0 +1,19 @@
+services:
+  app:
+    platform: linux/amd64
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    ports:
+      - "${PORT:-3000}:5173"
+    environment:
+      - NODE_ENV=development
+      - PORT=3000
+      - TEMP_DIR=/tmp/gemini-watermark
+      - MAX_FILE_SIZE=10485760
+      - MAX_CONCURRENT_PROCESSES=5
+      - FILE_RETENTION_HOURS=1
+    volumes:
+      - .:/app
+      - /app/node_modules
+    command: npm run dev

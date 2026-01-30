@@ -1,27 +1,9 @@
 ARG NODE_VERSION=24
 ARG TOOL_VERSION=latest
 
-# --- Build stage ---
-FROM node:${NODE_VERSION}-slim AS build
-WORKDIR /app
+FROM node:${NODE_VERSION}-slim
 
-COPY package.json package-lock.json ./
-RUN npm ci
-
-COPY . .
-RUN npm run build
-
-# --- Production dependencies ---
-FROM node:${NODE_VERSION}-slim AS production-deps
-WORKDIR /app
-
-COPY package.json package-lock.json ./
-RUN npm ci --omit=dev
-
-# --- Production stage ---
-FROM node:${NODE_VERSION}-slim AS production
-
-# Install curl for healthcheck
+# Install curl and unzip
 RUN apt-get update && apt-get install -y curl unzip && rm -rf /var/lib/apt/lists/*
 
 # Download and install GeminiWatermarkTool
@@ -42,27 +24,19 @@ RUN if [ "$TOOL_VERSION" = "latest" ]; then \
       echo "Warning: Could not download GeminiWatermarkTool binary"; \
     fi
 
-# Create non-root user
-RUN groupadd -r appgroup && useradd -r -g appgroup appuser
-
 WORKDIR /app
 
+# Copy package files and install dependencies
 COPY package.json package-lock.json ./
-COPY --from=production-deps /app/node_modules ./node_modules
-COPY --from=build /app/build ./build
+RUN npm ci
 
 # Create temp directory
-RUN mkdir -p /tmp/gemini-watermark && chown appuser:appgroup /tmp/gemini-watermark
+RUN mkdir -p /tmp/gemini-watermark && chmod 777 /tmp/gemini-watermark
 
-ENV NODE_ENV=production
+ENV NODE_ENV=development
 ENV PORT=3000
 ENV TEMP_DIR=/tmp/gemini-watermark
 
-USER appuser
-
 EXPOSE 3000
 
-HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
-  CMD curl -f http://localhost:3000/api/health || exit 1
-
-CMD ["npm", "run", "start"]
+CMD ["npm", "run", "dev"]

@@ -6,6 +6,7 @@ import {
   Scripts,
   ScrollRestoration,
 } from "react-router";
+import { Toaster } from "~/components/ui/sonner";
 
 import type { Route } from "./+types/root";
 import "./app.css";
@@ -32,8 +33,40 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Meta />
         <Links />
       </head>
-      <body>
-        {children}
+      <body className="min-h-screen flex flex-col">
+        <header className="border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50">
+          <div className="container mx-auto max-w-5xl px-4 py-3 flex items-center gap-3">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="h-6 w-6 text-primary"
+            >
+              <rect width="18" height="18" x="3" y="3" rx="2" ry="2" />
+              <circle cx="9" cy="9" r="2" />
+              <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21" />
+            </svg>
+            <h1 className="text-lg font-semibold tracking-tight">
+              Gemini Watermark Remover
+            </h1>
+          </div>
+        </header>
+
+        <main className="flex-1 container mx-auto max-w-5xl px-4 py-8">
+          {children}
+        </main>
+
+        <footer className="border-t border-border py-4 text-center text-sm text-muted-foreground">
+          <div className="container mx-auto max-w-5xl px-4">
+            Powered by GeminiWatermarkTool
+          </div>
+        </footer>
+
+        <Toaster />
         <ScrollRestoration />
         <Scripts />
       </body>
@@ -62,11 +95,11 @@ export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
   }
 
   return (
-    <main className="pt-16 p-4 container mx-auto">
-      <h1>{message}</h1>
-      <p>{details}</p>
+    <main className="pt-16 p-4 container mx-auto max-w-5xl">
+      <h1 className="text-2xl font-bold">{message}</h1>
+      <p className="mt-2 text-muted-foreground">{details}</p>
       {stack && (
-        <pre className="w-full p-4 overflow-x-auto">
+        <pre className="mt-4 w-full p-4 overflow-x-auto rounded-md bg-muted text-sm">
           <code>{stack}</code>
         </pre>
       )}
